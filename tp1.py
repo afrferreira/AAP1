@@ -33,23 +33,30 @@ Xs = (Xs-means)/stdevs
 
 Xr,Xt,Yr,Yt = train_test_split(Xs, Ys, test_size=0.33, stratify=Ys)
 
-def calc_fold(feats, X,Y, train_ix, valid_ix):
+def calc_fold(feats, X,Y, train_ix, valid_ix,Cval):
     """return error for train and validation sets"""
-    Cval=1
-    for ite in range(1,20):
-        Cval*=20
-        reg = LogisticRegression(C=Cval, tol=1e-10)
-        reg.fit(X[train_ix, :feats],Y[train_ix])
-        prob = reg.predict_proba(X[:,:feats])[:,1]
-        squares = (prob - Y)**2
+    reg = LogisticRegression(C=Cval, tol=1e-10)
+    reg.fit(X[train_ix, :feats],Y[train_ix])
+    prob = reg.predict_proba(X[:,:feats])[:,1]
+    squares = (prob - Y)**2
     return np.mean(squares[train_ix]),np.mean(squares[valid_ix])
 
 folds = 5
 kf = StratifiedKFold(n_splits = folds)
-for feats in range(1,4):
+for feats in range(1,5):
    tr_err = va_err = 0
-   for tr_ix,va_ix in kf.split(Y_r,Y_r):
-       r,v = calc_fold(feats,X_r,Y_r,tr_ix,va_ix)
-       tr_err += r
-       va_err += v
-       print(feats,':', tr_err/folds,va_err/folds)
+   for tr_ix,va_ix in kf.split(Yr,Yr):
+       Cval=1
+       for ite in range(1,21):    
+           Cval*=20
+           r,v = calc_fold(feats,Xr,Yr,tr_ix,va_ix,Cval)
+           tr_err += r
+           va_err += v
+           tr = tr_err/folds
+           va = va_err/folds
+           print(feats,':', tr,va)
+           plt.figure(1,figsize=(30,10),frameon=False)
+           plt.plot(tr, va ,'or',color = "C"+str(feats))
+           
+           
+plt.savefig("tp1LogReg.png")           
