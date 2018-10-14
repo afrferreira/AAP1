@@ -59,4 +59,5 @@ for feats in range(1,5):
            plt.plot(tr, va ,'or',color = "C"+str(feats))
            
            
-plt.savefig("tp1LogReg.png")           
+plt.savefig("tp1LogReg.png")  
+plt.close()         
