@@ -5,7 +5,7 @@ Created on Thu Oct 11 09:41:16 2018
 
 @author: andrefrf
 """
-
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings;
@@ -43,21 +43,29 @@ def calc_fold(feats, X,Y, train_ix, valid_ix,Cval):
 
 folds = 5
 kf = StratifiedKFold(n_splits = folds)
-for feats in range(1,5):
-   tr_err = va_err = 0
-   for tr_ix,va_ix in kf.split(Yr,Yr):
-       Cval=1
-       for ite in range(1,21):    
-           Cval*=20
-           r,v = calc_fold(feats,Xr,Yr,tr_ix,va_ix,Cval)
-           tr_err += r
-           va_err += v
-           tr = tr_err/folds
-           va = va_err/folds
-           print(feats,':', tr,va)
-           plt.figure(1,figsize=(30,10),frameon=False)
-           plt.plot(tr, va ,'or',color = "C"+str(feats))
-           
-           
+feats=4
+Cval=1
+trainning_error = []
+validation_error = []
+for ite in range(20):
+    tr_err = va_err = 0
+    for tr_ix,va_ix in kf.split(Yr,Yr):
+        r,v = calc_fold(feats,Xr,Yr,tr_ix,va_ix,Cval)
+        tr_err += r
+        va_err += v
+    
+    trainning_error.append([np.log(Cval),tr_err/folds])
+    
+    validation_error.append([np.log(Cval),va_err/folds])
+    Cval*=2
+
+trainning_error2 = np.array(trainning_error)
+validation_error2 = np.array(validation_error)
+plt.plot(trainning_error2[:,0],trainning_error2[:,1],'-r')
+plt.plot(validation_error2[:,0],validation_error2[:,1],'-g') 
+
+plt.show()
+plt.close()
+
 plt.savefig("tp1LogReg.png")  
 plt.close()         
